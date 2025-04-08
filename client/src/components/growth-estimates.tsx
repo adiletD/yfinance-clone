@@ -23,14 +23,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit2, Save, X, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface GrowthEstimatesProps {
   ticker: string;
 }
 
 export default function GrowthEstimates({ ticker }: GrowthEstimatesProps) {
-  // Temporarily use a null user until auth is fixed
-  const user = null;
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [customEstimates, setCustomEstimates] = useState<Record<string, string>>({

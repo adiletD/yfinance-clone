@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Search,
   User,
@@ -27,10 +28,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export default function Navbar() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user, logoutMutation } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // Temporarily replace with a dummy user state until auth is fixed
-  const user = null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +42,7 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
+    logoutMutation.mutate();
     navigate("/");
   };
 
