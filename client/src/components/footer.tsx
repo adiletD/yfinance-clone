@@ -39,31 +39,23 @@ export default function Footer() {
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Markets</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        US Markets
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      US Markets
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        International
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      International
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Commodities
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Commodities
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Cryptocurrencies
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Cryptocurrencies
                     </Link>
                   </li>
                 </ul>
@@ -72,31 +64,23 @@ export default function Footer() {
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Tools</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Portfolio
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Portfolio
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Watchlists
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Watchlists
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Screeners
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Screeners
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Custom Estimates
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Custom Estimates
                     </Link>
                   </li>
                 </ul>
@@ -107,31 +91,23 @@ export default function Footer() {
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Resources</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        News
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      News
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Videos
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Videos
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Analyst Research
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Analyst Research
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Market Calendar
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Market Calendar
                     </Link>
                   </li>
                 </ul>
@@ -140,31 +116,23 @@ export default function Footer() {
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Company</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        About
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      About
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Privacy
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Privacy
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Terms
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Terms
                     </Link>
                   </li>
                   <li>
-                    <Link href="#">
-                      <a className="text-base text-gray-500 hover:text-gray-900">
-                        Contact Us
-                      </a>
+                    <Link href="#" className="text-base text-gray-500 hover:text-gray-900">
+                      Contact Us
                     </Link>
                   </li>
                 </ul>
