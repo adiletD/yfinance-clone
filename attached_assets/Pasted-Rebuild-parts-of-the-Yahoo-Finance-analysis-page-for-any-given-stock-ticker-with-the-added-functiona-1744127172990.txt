@@ -1,0 +1,57 @@
+Rebuild parts of the Yahoo Finance analysis page for any given stock ticker with the added
+functionality to input and save custom estimates. The goal is to demonstrate your ability to
+build a functional full-stack solution based on your own skill and creativity.
+Please use ReactJS for the front end and Python FastAPI for the backend – other than that
+you are free to use any libraries or tools you prefer (including AI).
+Core Features
+1. Stock Analysis Page
+Recreate the below list of components from Yahoo Finance's analysis page (e.g.
+https://finance.yahoo.com/quote/MSFT/analysis/) for any given ticker, including
+visualisations.
+You are welcome to use any component libraries and alter any charts or design
+elements – it does not need to be an exact match as long as the data is still
+represented in a similar way.
+• Ticker and price summary
+• Research Analysis
+• Earnings Estimate
+• Revenue Estimate
+• Growth Estimate
+2. Custom Estimates
+• Allow users to input and save their own earnings, revenue, and growth estimates
+• Display both Yahoo's data and custom estimates side-by-side
+• Ensure client feedback on validation checks in the UI
+• Enforce access control – users can update their own set of tickers but not others
+Evaluation Criteria
+1. Completeness: All core features implemented
+2. Code Quality: Readable, tested and well-structured code
+3. Security: Authentication, input validation, audit logging
+4. Performance: Efficient handling of data and requests
+5. Documentation: Clear setup instructions and code comments
+
+Technical Requirements
+1. Backend
+• RESTful API endpoints using Python FastAPI
+• Data fetching from Yahoo Finance (yfinance-python.org)
+• Audit logging for all estimate inputs and modifications
+• Unit & Integration tests where applicable
+2. Frontend
+• Clean, intuitive UI with good UX in React
+• Client-side validation and error handling
+3. Database
+• Store user accounts and custom estimates
+• SQLite or any standalone SQL database
+o Include a Docker command if it needs to be spun up separately
+
+4. Performance
+• Demonstrate parallel processing for handling multiple requests
+• Performance tests where applicable
+5. Infrastructure
+• Docker setup for easy local development
+• README with:
+o Clear documentation on how to run the application
+o Production deployment plan
+▪ CI/CD setup
+▪ High Availability architecture
+▪ Cloud infrastructure components
+▪ Monitoring and Alerting
+o Suggestions for further enhancements or improvements
