@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-simple-auth";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,8 +43,9 @@ const registerSchema = z.object({
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [, navigate] = useLocation();
-  const { loginMutation, registerMutation } = useAuth();
+  const { login, register, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  const [isPending, setIsPending] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -63,20 +64,35 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     },
   });
 
-  const onLoginSubmit = (values: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+  const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
+    try {
+      setIsPending(true);
+      await login({ 
+        username: values.username, 
+        password: values.password 
+      });
+      onClose();
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
-  const onRegisterSubmit = (values: z.infer<typeof registerSchema>) => {
-    registerMutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+  const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
+    try {
+      setIsPending(true);
+      await register({
+        username: values.username,
+        email: values.email,
+        password: values.password
+      });
+      onClose();
+    } catch (error) {
+      console.error("Registration failed:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -157,10 +173,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={loginMutation.isPending}
+                    disabled={isPending}
                     className="bg-primary text-white"
                   >
-                    {loginMutation.isPending ? "Signing in..." : "Sign in"}
+                    {isPending ? "Signing in..." : "Sign in"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -234,12 +250,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={registerMutation.isPending}
+                    disabled={isPending}
                     className="bg-primary text-white"
                   >
-                    {registerMutation.isPending
-                      ? "Creating account..."
-                      : "Create account"}
+                    {isPending ? "Creating account..." : "Create account"}
                   </Button>
                 </DialogFooter>
               </form>
