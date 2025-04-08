@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Card,
@@ -22,8 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Save, X, AlertTriangle } from "lucide-react";
+import { Edit2, Save, X, AlertTriangle, Info } from "lucide-react";
 import { useAuth } from "@/hooks/use-simple-auth";
+import { useGuestEstimates, GuestEarningsEstimate } from "@/hooks/use-guest-estimates";
 
 interface EarningsEstimatesProps {
   ticker: string;
@@ -32,6 +33,7 @@ interface EarningsEstimatesProps {
 export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { getEarningsEstimate, saveEarningsEstimate } = useGuestEstimates();
   const [isEditing, setIsEditing] = useState(false);
   const [customEstimates, setCustomEstimates] = useState<Record<string, string>>({
     currentQtr: "",
@@ -39,6 +41,7 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
     currentYear: "",
     nextYear: "",
   });
+  const [guestEstimate, setGuestEstimate] = useState<GuestEarningsEstimate | null>(null);
   
   // Debug: Log auth state
   console.log("EarningsEstimates auth state:", { user, isUser: !!user });
@@ -59,6 +62,12 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
     queryKey: [`/api/user/estimates/${ticker}/earnings`],
     enabled: !!user,
   });
+  
+  // Load guest estimates on component mount
+  useEffect(() => {
+    const estimate = getEarningsEstimate(ticker);
+    setGuestEstimate(estimate);
+  }, [ticker, getEarningsEstimate]);
   
   // Mutation for saving custom estimates
   const saveMutation = useMutation({
@@ -95,12 +104,21 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
   
   // Initialize editing form with current estimates
   const startEditing = () => {
-    if (userEstimates?.periods) {
+    if (user && userEstimates?.periods) {
+      // If user is logged in, use their saved estimates
       setCustomEstimates({
         currentQtr: userEstimates.periods.currentQtr.toString(),
         nextQtr: userEstimates.periods.nextQtr.toString(),
         currentYear: userEstimates.periods.currentYear.toString(),
         nextYear: userEstimates.periods.nextYear.toString(),
+      });
+    } else if (!user && guestEstimate?.periods) {
+      // If guest user has saved estimates, use those
+      setCustomEstimates({
+        currentQtr: guestEstimate.periods.currentQtr.toString(),
+        nextQtr: guestEstimate.periods.nextQtr.toString(),
+        currentYear: guestEstimate.periods.currentYear.toString(),
+        nextYear: guestEstimate.periods.nextYear.toString(),
       });
     } else {
       // Initialize with empty strings
@@ -158,10 +176,32 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
       return;
     }
     
-    saveMutation.mutate({
-      ticker,
-      periods,
-    });
+    if (user) {
+      // If user is logged in, save to server
+      saveMutation.mutate({
+        ticker,
+        periods,
+      });
+    } else {
+      // If no user is logged in, save to localStorage
+      saveEarningsEstimate(ticker, periods);
+      setGuestEstimate({
+        ticker,
+        periods: {
+          currentQtr: periods.currentQtr || 0,
+          nextQtr: periods.nextQtr || 0,
+          currentYear: periods.currentYear || 0,
+          nextYear: periods.nextYear || 0
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      setIsEditing(false);
+      toast({
+        title: "Estimates Saved",
+        description: "Your custom earnings estimates have been saved locally. Sign in to save them permanently.",
+      });
+    }
   };
   
   // Format number as currency
@@ -187,25 +227,27 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
           </CardDescription>
         </div>
         
-        {user && !isEditing && (
+        {/* Show edit button for both logged-in users and guests */}
+        {!isEditing && (
           <Button 
             variant="outline" 
             size="sm" 
             onClick={startEditing}
-            disabled={isLoading || saveMutation.isPending}
+            disabled={isLoading || (!!user && saveMutation.isPending)}
           >
             <Edit2 className="h-4 w-4 mr-2" />
-            {userEstimates ? "Edit Estimates" : "Add Estimates"}
+            {(user && userEstimates) || (!user && guestEstimate) ? "Edit Estimates" : "Add Estimates"}
           </Button>
         )}
         
-        {user && isEditing && (
+        {/* Show save/cancel buttons when editing (for both users and guests) */}
+        {isEditing && (
           <div className="flex space-x-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={cancelEditing}
-              disabled={saveMutation.isPending}
+              disabled={!!user && saveMutation.isPending}
             >
               <X className="h-4 w-4 mr-2" />
               Cancel
@@ -214,10 +256,10 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
               variant="default" 
               size="sm" 
               onClick={saveCustomEstimates}
-              disabled={saveMutation.isPending}
+              disabled={!!user && saveMutation.isPending}
             >
               <Save className="h-4 w-4 mr-2" />
-              {saveMutation.isPending ? "Saving..." : "Save"}
+              {!!user && saveMutation.isPending ? "Saving..." : "Save"}
             </Button>
           </div>
         )}
@@ -226,9 +268,9 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
       <CardContent>
         {!user && (
           <Alert className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
+            <Info className="h-4 w-4" />
             <AlertDescription>
-              Sign in to add your own earnings estimates and compare them with Yahoo Finance data.
+              Your estimates will be saved locally. Sign in to save them permanently and access them from any device.
             </AlertDescription>
           </Alert>
         )}
@@ -247,7 +289,7 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
                 <TableHead>Yahoo Estimate</TableHead>
                 <TableHead>Low / High</TableHead>
                 <TableHead>Year Ago</TableHead>
-                {(user && !isEditing) && (
+                {(!isEditing) && (
                   <TableHead>Your Estimate</TableHead>
                 )}
                 {isEditing && (
@@ -273,10 +315,12 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
                 <TableCell>
                   {formatCurrency(earningsData?.currentQtr.yearAgo)}
                 </TableCell>
-                {(user && !isEditing) && (
+                {(!isEditing) && (
                   <TableCell>
-                    {userEstimates?.periods.currentQtr !== undefined
+                    {user && userEstimates?.periods.currentQtr !== undefined
                       ? formatCurrency(userEstimates.periods.currentQtr)
+                      : !user && guestEstimate?.periods.currentQtr
+                      ? formatCurrency(guestEstimate.periods.currentQtr)
                       : "-"}
                   </TableCell>
                 )}
@@ -310,10 +354,12 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
                 <TableCell>
                   {formatCurrency(earningsData?.nextQtr.yearAgo)}
                 </TableCell>
-                {(user && !isEditing) && (
+                {(!isEditing) && (
                   <TableCell>
-                    {userEstimates?.periods.nextQtr !== undefined
+                    {user && userEstimates?.periods.nextQtr !== undefined
                       ? formatCurrency(userEstimates.periods.nextQtr)
+                      : !user && guestEstimate?.periods.nextQtr
+                      ? formatCurrency(guestEstimate.periods.nextQtr)
                       : "-"}
                   </TableCell>
                 )}
@@ -347,10 +393,12 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
                 <TableCell>
                   {formatCurrency(earningsData?.currentYear.yearAgo)}
                 </TableCell>
-                {(user && !isEditing) && (
+                {(!isEditing) && (
                   <TableCell>
-                    {userEstimates?.periods.currentYear !== undefined
+                    {user && userEstimates?.periods.currentYear !== undefined
                       ? formatCurrency(userEstimates.periods.currentYear)
+                      : !user && guestEstimate?.periods.currentYear
+                      ? formatCurrency(guestEstimate.periods.currentYear)
                       : "-"}
                   </TableCell>
                 )}
@@ -384,10 +432,12 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
                 <TableCell>
                   {formatCurrency(earningsData?.nextYear.yearAgo)}
                 </TableCell>
-                {(user && !isEditing) && (
+                {(!isEditing) && (
                   <TableCell>
-                    {userEstimates?.periods.nextYear !== undefined
+                    {user && userEstimates?.periods.nextYear !== undefined
                       ? formatCurrency(userEstimates.periods.nextYear)
+                      : !user && guestEstimate?.periods.nextYear
+                      ? formatCurrency(guestEstimate.periods.nextYear)
                       : "-"}
                   </TableCell>
                 )}
