@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-simple-auth";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { insertUserSchema } from "@shared/schema";
 import {
   Card,
   CardContent,
@@ -43,13 +42,16 @@ const loginSchema = z.object({
   }),
 });
 
-// Create a register schema based on the insert user schema
-const registerSchema = insertUserSchema.extend({
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+// Create a register schema
+const registerSchema = z.object({
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
   }),
 });
 
@@ -59,9 +61,10 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [, navigate] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, login, register, isLoading } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [isPending, setIsPending] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -90,43 +93,33 @@ export default function AuthPage() {
   });
 
   // Handle login form submission
-  const onLoginSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-        navigate("/");
-      },
-      onError: (error: Error) => {
-        toast({
-          title: "Login Failed",
-          description: error.message || "Invalid credentials",
-          variant: "destructive",
-        });
-      },
-    });
+  const onLoginSubmit = async (data: LoginFormValues) => {
+    setIsPending(true);
+    try {
+      await login(data);
+      // The auth hook will handle the toast notification
+      navigate("/");
+    } catch (error) {
+      // The auth hook will handle error toasts
+      console.error("Login error:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   // Handle register form submission
-  const onRegisterSubmit = (data: RegisterFormValues) => {
-    registerMutation.mutate(data, {
-      onSuccess: () => {
-        toast({
-          title: "Registration Successful",
-          description: "Your account has been created.",
-        });
-        navigate("/");
-      },
-      onError: (error: Error) => {
-        toast({
-          title: "Registration Failed",
-          description: error.message || "Username or email may already be in use",
-          variant: "destructive",
-        });
-      },
-    });
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
+    setIsPending(true);
+    try {
+      await register(data);
+      // The auth hook will handle the toast notification
+      navigate("/");
+    } catch (error) {
+      // The auth hook will handle error toasts
+      console.error("Registration error:", error);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -207,9 +200,9 @@ export default function AuthPage() {
                     <Button
                       type="submit"
                       className="w-full"
-                      disabled={loginMutation.isPending}
+                      disabled={isPending || isLoading}
                     >
-                      {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                      {isPending ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
                 </Form>
@@ -289,9 +282,9 @@ export default function AuthPage() {
                     <Button
                       type="submit"
                       className="w-full"
-                      disabled={registerMutation.isPending}
+                      disabled={isPending || isLoading}
                     >
-                      {registerMutation.isPending
+                      {isPending
                         ? "Creating account..."
                         : "Create Account"}
                     </Button>

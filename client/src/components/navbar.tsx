@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-simple-auth";
 import {
   Search,
   User,
@@ -28,7 +28,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export default function Navbar() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { user, logoutMutation } = useAuth();
+  const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logout();
     navigate("/");
   };
 

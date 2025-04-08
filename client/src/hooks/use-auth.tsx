@@ -14,6 +14,14 @@ export interface SelectUser {
   email: string;
 }
 
+// Type guards to ensure proper type safety
+function isSelectUser(user: any): user is SelectUser {
+  return user && 
+    typeof user.id === 'number' && 
+    typeof user.username === 'string' && 
+    typeof user.email === 'string';
+}
+
 type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
@@ -87,12 +95,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [mockUser, setMockUser] = useState<SelectUser | null>(() => {
     const savedUser = localStorage.getItem('mockUser');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        return isSelectUser(parsed) ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
   });
 
-  // Check if we should use the simplified auth mode
+  // Always use the simplified auth mode for this app
   const useSimpleAuth = true;
 
+  // Server authentication is disabled when using simple auth
   const {
     data: serverUser,
     error,
@@ -106,13 +123,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Determine the actual user - either from server or our mock implementation
   const user = useSimpleAuth ? mockUser : serverUser;
 
-  const loginMutation = useMutation({
+  // Login mutation handling
+  const loginMutation = useMutation<SelectUser, Error, LoginData>({
     mutationFn: async (credentials: LoginData) => {
       if (useSimpleAuth) {
         // Simple mock authentication
-        // In a real app, this would validate against a server
         if (credentials.username && credentials.password) {
-          const mockUser = {
+          const mockUser: SelectUser = {
             id: 1,
             username: credentials.username,
             email: `${credentials.username}@example.com`
@@ -125,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Invalid credentials");
       } else {
         // Regular server authentication
-        const response = await apiRequest("POST", "/api/login", credentials);
+        const response = await apiRequest<SelectUser>("POST", "/api/login", credentials);
         return response;
       }
     },
@@ -148,11 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const registerMutation = useMutation({
+  // Registration mutation handling
+  const registerMutation = useMutation<SelectUser, Error, RegisterData>({
     mutationFn: async (data: RegisterData) => {
       if (useSimpleAuth) {
         // Simple mock registration
-        const mockUser = {
+        const mockUser: SelectUser = {
           id: 1,
           username: data.username,
           email: data.email
@@ -163,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return mockUser;
       } else {
         // Regular server registration
-        const response = await apiRequest("POST", "/api/register", data);
+        const response = await apiRequest<SelectUser>("POST", "/api/register", data);
         return response;
       }
     },
@@ -186,7 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const logoutMutation = useMutation({
+  // Logout mutation handling
+  const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
       if (useSimpleAuth) {
         // Simple mock logout
@@ -213,22 +232,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const value: AuthContextType = {
+    user: user ?? null,
+    isLoading: !useSimpleAuth && isLoading,
+    error,
+    loginMutation: loginMutation as UseMutationResult<SelectUser, Error, LoginData>,
+    logoutMutation: logoutMutation as UseMutationResult<void, Error, void>,
+    registerMutation: registerMutation as UseMutationResult<SelectUser, Error, RegisterData>,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading: !useSimpleAuth && isLoading,
-        error,
-        loginMutation,
-        logoutMutation,
-        registerMutation,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  // Return the default context instead of throwing an error
+  // This makes the hook more resilient and allows it to be used anywhere
+  return context;
 }
