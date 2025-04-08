@@ -4,6 +4,14 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { EarningsEstimate, RevenueEstimate, GrowthEstimate } from "@shared/schema";
+import { 
+  getStockData, 
+  getAnalystData, 
+  getEarningsEstimates, 
+  getRevenueEstimates, 
+  getGrowthEstimates, 
+  searchStocks 
+} from "./api";
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
@@ -40,7 +48,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Use the proxy for all API requests
+  // Add our own API routes to handle stock data
+  // Stock data route
+  app.get('/api/stock/:ticker', async (req, res) => {
+    try {
+      const ticker = req.params.ticker.toUpperCase();
+      console.log(`Handling request for stock data for ${ticker}`);
+      const data = await getStockData(ticker);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling stock data request for ${req.params.ticker}:`, error);
+      res.status(500).json({ message: "Failed to fetch stock data" });
+    }
+  });
+
+  // Analyst data route
+  app.get('/api/stock/:ticker/analyst', async (req, res) => {
+    try {
+      const ticker = req.params.ticker.toUpperCase();
+      console.log(`Handling request for analyst data for ${ticker}`);
+      const data = await getAnalystData(ticker);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling analyst data request for ${req.params.ticker}:`, error);
+      res.status(500).json({ message: "Failed to fetch analyst data" });
+    }
+  });
+
+  // Earnings data route
+  app.get('/api/stock/:ticker/earnings', async (req, res) => {
+    try {
+      const ticker = req.params.ticker.toUpperCase();
+      console.log(`Handling request for earnings data for ${ticker}`);
+      const data = await getEarningsEstimates(ticker);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling earnings data request for ${req.params.ticker}:`, error);
+      res.status(500).json({ message: "Failed to fetch earnings data" });
+    }
+  });
+
+  // Revenue data route
+  app.get('/api/stock/:ticker/revenue', async (req, res) => {
+    try {
+      const ticker = req.params.ticker.toUpperCase();
+      console.log(`Handling request for revenue data for ${ticker}`);
+      const data = await getRevenueEstimates(ticker);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling revenue data request for ${req.params.ticker}:`, error);
+      res.status(500).json({ message: "Failed to fetch revenue data" });
+    }
+  });
+
+  // Growth data route
+  app.get('/api/stock/:ticker/growth', async (req, res) => {
+    try {
+      const ticker = req.params.ticker.toUpperCase();
+      console.log(`Handling request for growth data for ${ticker}`);
+      const data = await getGrowthEstimates(ticker);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling growth data request for ${req.params.ticker}:`, error);
+      res.status(500).json({ message: "Failed to fetch growth data" });
+    }
+  });
+
+  // Stock search route
+  app.get('/api/search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      console.log(`Handling search request for "${query}"`);
+      const data = await searchStocks(query);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error handling search request:`, error);
+      res.status(500).json({ message: "Failed to search for stocks" });
+    }
+  });
+
+  // Use the proxy as fallback for all other API requests
   app.use('/api', apiProxy);
   
   // For now, we'll keep the original routes as fallbacks
