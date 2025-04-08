@@ -1,10 +1,10 @@
 import uvicorn
 
 if __name__ == "__main__":
-    # Run uvicorn server directly
+    # Run FastAPI server on port 3000 to avoid conflict with Express
     uvicorn.run(
         "api.main:app", 
         host="0.0.0.0", 
-        port=5000,  # Changed from 3000 to 5000
+        port=3000,  # Using port 3000 for API only
         reload=True
     )

@@ -40,7 +40,7 @@ from api.yahoo_finance import (
     get_growth_estimates, search_stocks
 )
 
-# Create FastAPI app
+# Create FastAPI app - API only
 app = FastAPI(title="Yahoo Finance Clone API", version="1.0.0")
 
 # Add CORS middleware
@@ -51,113 +51,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Setup static file serving for client assets
-# Determine the current directory and client build path
-CURRENT_DIR = pathlib.Path(__file__).parent.parent
-CLIENT_DIR = CURRENT_DIR / "client"
-DIST_DIR = CLIENT_DIR / "dist"
-
-# For development, we'll use Vite's development server for client assets
-# Production would use static file serving from the dist directory
-production_mode = False  # Set to True when building for production
-
-if production_mode and DIST_DIR.exists():
-    print(f"Mounting static files from {DIST_DIR} (production mode)")
-    # Mount production assets
-    app.mount("/assets", StaticFiles(directory=str(DIST_DIR / "assets")), name="assets")
-    app.mount("/", StaticFiles(directory=str(DIST_DIR)), name="root")
-else:
-    print("Running in development mode - serving client files directly")
-    # Mount development directories
-    # First, ensure all directories exist
-    client_src = CLIENT_DIR / "src"
-    node_modules = CURRENT_DIR / "node_modules"
-    
-    # Mount directories with appropriate content types
-    app.mount("/src", StaticFiles(directory=str(client_src)), name="src")
-    app.mount("/client", StaticFiles(directory=str(CLIENT_DIR)), name="client")
-    app.mount("/node_modules", StaticFiles(directory=str(node_modules)), name="node_modules")
-    
-    # You can add more static directories as needed
-    print(f"Static directories mounted: /src, /client, /node_modules")
-
-# Root route to serve the index.html
-@app.get("/", include_in_schema=False)
-@app.get("/{full_path:path}", include_in_schema=False)
-async def serve_spa(full_path: str = "", request: Request = None):
-    # Log the path being requested
-    print(f"Serving path: {full_path}")
-    
-    # Handle API routes
-    if full_path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="API route not found")
-    
-    # Check if it's a static file request
-    static_paths = ["assets/", "src/", "node_modules/", "client/"]
-    if full_path and any(full_path.startswith(path) for path in static_paths):
-        # These should be handled by the StaticFiles mounts, but if it gets here, it means it wasn't found
-        print(f"Static file not found: {full_path}")
-        raise HTTPException(status_code=404, detail=f"Static file not found: {full_path}")
-    
-    # Create a custom file handler for all static files
-    # Handle JavaScript, TypeScript, CSS, and other frontend files
-    ext_to_content_type = {
-        ".js": "application/javascript",
-        ".jsx": "application/javascript",
-        ".ts": "application/javascript",
-        ".tsx": "application/javascript",
-        ".css": "text/css",
-        ".html": "text/html",
-        ".json": "application/json",
-        ".svg": "image/svg+xml",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".gif": "image/gif",
-        ".woff": "font/woff",
-        ".woff2": "font/woff2",
-        ".ttf": "font/ttf",
-        ".eot": "application/vnd.ms-fontobject"
-    }
-    
-    # Check the file extension
-    file_ext = "." + full_path.split(".")[-1] if "." in full_path else ""
-    if file_ext in ext_to_content_type:
-        # Try to locate the file in different directories
-        file_path = None
-        search_paths = [
-            CLIENT_DIR / "src" / full_path,  # client/src/{path}
-            CLIENT_DIR / full_path,          # client/{path}
-            CURRENT_DIR / full_path,         # {path} in root
-            CURRENT_DIR / "node_modules" / full_path  # node_modules/{path}
-        ]
-        
-        for path in search_paths:
-            if path.exists():
-                file_path = path
-                break
-                
-        if file_path:
-            # Set the appropriate content type based on extension
-            content_type = ext_to_content_type.get(file_ext, "application/octet-stream")
-            headers = {"Content-Type": content_type}
-            print(f"Serving file {file_path} with content type {content_type}")
-            try:
-                with open(file_path, 'rb') as f:
-                    content = f.read()
-                return Response(content=content, media_type=content_type)
-            except Exception as e:
-                print(f"Error reading file {file_path}: {e}")
-                raise HTTPException(status_code=500, detail=f"Error reading file: {e}")
-    
-    # For SPA routing, return the index.html
-    # First check in the dist directory (production)
-    index_file = DIST_DIR / "index.html" if DIST_DIR.exists() else CLIENT_DIR / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
-    else:
-        raise HTTPException(status_code=404, detail="Frontend application not found")
 
 # Authentication endpoints
 @app.post("/api/token", response_model=Token)
@@ -444,4 +337,4 @@ async def get_user_growth_estimate(
 
 # For direct running (development)
 if __name__ == "__main__":
-    uvicorn.run("api.main:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=3000, reload=True)
