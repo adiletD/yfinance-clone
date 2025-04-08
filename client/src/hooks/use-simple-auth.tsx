@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check if user is already logged in on initial load
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       // Save user to localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('mockUser', JSON.stringify(user));
       setUser(user);
 
       toast({
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       // Save user to localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('mockUser', JSON.stringify(user));
       setUser(user);
 
       toast({
@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('mockUser');
     setUser(null);
     toast({
       title: 'Logged out',
