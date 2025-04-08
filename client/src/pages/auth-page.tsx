@@ -68,7 +68,12 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
+    console.log("[AuthPage] useEffect - user state changed:", { user });
+    
     if (user) {
+      // User is logged in, redirect to home
+      console.log("[AuthPage] User detected, redirecting to home");
+      setIsPending(false); // Make sure we reset isPending when user state changes
       navigate("/");
     }
   }, [user, navigate]);
@@ -99,27 +104,30 @@ export default function AuthPage() {
     try {
       await login(data);
       console.log("[AuthPage] Login successful, user state:", { user });
-      // The auth hook will handle the toast notification
-      navigate("/");
+      
+      // Don't redirect immediately - let the useEffect handle it
+      // The useEffect will redirect once the user state is updated
+      // This ensures we don't try to navigate before the auth state is ready
     } catch (error) {
       // The auth hook will handle error toasts
       console.error("Login error:", error);
-    } finally {
       setIsPending(false);
     }
   };
 
   // Handle register form submission
   const onRegisterSubmit = async (data: RegisterFormValues) => {
+    console.log("[AuthPage] Register submit:", data);
     setIsPending(true);
     try {
       await register(data);
-      // The auth hook will handle the toast notification
-      navigate("/");
+      console.log("[AuthPage] Registration successful, user state:", { user });
+      
+      // Don't redirect immediately - let the useEffect handle it
+      // The useEffect will redirect once the user state is updated
     } catch (error) {
       // The auth hook will handle error toasts
       console.error("Registration error:", error);
-    } finally {
       setIsPending(false);
     }
   };

@@ -59,10 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log('[AuthProvider] Setting user from localStorage:', parsedUser);
-        setUser(parsedUser);
+        console.log('[AuthProvider] Found stored user:', parsedUser);
+        
+        // Use functional update to ensure we're working with the latest state
+        setUser(currentUser => {
+          console.log('[AuthProvider] Setting initial user from localStorage. Current:', currentUser, 'New:', parsedUser);
+          return parsedUser;
+        });
       } catch (err) {
-        console.error('Failed to parse stored user data', err);
+        console.error('[AuthProvider] Failed to parse stored user data', err);
+        localStorage.removeItem('mockUser'); // Clean up invalid data
       }
     }
     setIsLoading(false);
@@ -93,8 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('mockUser', JSON.stringify(user));
       console.log('[AuthProvider] User saved to localStorage');
       
-      setUser(user);
-      console.log('[AuthProvider] User state updated');
+      // Use functional update to ensure we're working with the latest state
+      setUser(currentUser => {
+        console.log('[AuthProvider] Updating user state from:', currentUser, 'to:', user);
+        return user;
+      });
+      console.log('[AuthProvider] User state update initiated');
 
       toast({
         title: 'Login successful',
@@ -138,7 +148,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Save user to localStorage for persistence
       localStorage.setItem('mockUser', JSON.stringify(user));
-      setUser(user);
+      console.log('[AuthProvider] User saved to localStorage during registration');
+      
+      // Use functional update to ensure we're working with the latest state
+      setUser(currentUser => {
+        console.log('[AuthProvider] Updating user state during registration from:', currentUser, 'to:', user);
+        return user;
+      });
+      console.log('[AuthProvider] User state update initiated during registration');
 
       toast({
         title: 'Registration successful',
