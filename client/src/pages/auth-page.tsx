@@ -102,12 +102,14 @@ export default function AuthPage() {
     console.log("[AuthPage] Login submit:", data);
     setIsPending(true);
     try {
-      await login(data);
-      console.log("[AuthPage] Login successful, user state:", { user });
+      const loggedInUser = await login(data);
+      console.log("[AuthPage] Login successful, returned user:", loggedInUser, "current user state:", { user });
       
-      // Don't redirect immediately - let the useEffect handle it
-      // The useEffect will redirect once the user state is updated
-      // This ensures we don't try to navigate before the auth state is ready
+      // Force navigation after login is complete - with a small delay to allow the state to update
+      setTimeout(() => {
+        navigate("/");
+        setIsPending(false);
+      }, 100);
     } catch (error) {
       // The auth hook will handle error toasts
       console.error("Login error:", error);
@@ -120,11 +122,14 @@ export default function AuthPage() {
     console.log("[AuthPage] Register submit:", data);
     setIsPending(true);
     try {
-      await register(data);
-      console.log("[AuthPage] Registration successful, user state:", { user });
+      const registeredUser = await register(data);
+      console.log("[AuthPage] Registration successful, returned user:", registeredUser, "current user state:", { user });
       
-      // Don't redirect immediately - let the useEffect handle it
-      // The useEffect will redirect once the user state is updated
+      // Force navigation after registration is complete - with a small delay to allow the state to update
+      setTimeout(() => {
+        navigate("/");
+        setIsPending(false);
+      }, 100);
     } catch (error) {
       // The auth hook will handle error toasts
       console.error("Registration error:", error);

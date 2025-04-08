@@ -23,8 +23,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => void;
 }
 
@@ -33,8 +33,8 @@ const defaultAuthContext: AuthContextType = {
   user: null,
   isLoading: false,
   error: null,
-  login: async () => {},
-  register: async () => {},
+  login: async () => ({ id: 0, username: '', email: '' }),
+  register: async () => ({ id: 0, username: '', email: '' }),
   logout: () => {},
 };
 
@@ -87,29 +87,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Create a mock user (In a real app, this would be from an API)
-      const user: User = {
+      const newUser: User = {
         id: 1,
         username: credentials.username,
         email: `${credentials.username}@example.com`,
       };
 
-      console.log('[AuthProvider] User created:', user);
+      console.log('[AuthProvider] User created:', newUser);
       
-      // Save user to localStorage for persistence
-      localStorage.setItem('mockUser', JSON.stringify(user));
+      // Save user to localStorage for persistence immediately
+      localStorage.setItem('mockUser', JSON.stringify(newUser));
       console.log('[AuthProvider] User saved to localStorage');
       
-      // Use functional update to ensure we're working with the latest state
-      setUser(currentUser => {
-        console.log('[AuthProvider] Updating user state from:', currentUser, 'to:', user);
-        return user;
-      });
-      console.log('[AuthProvider] User state update initiated');
+      // Directly set the user state 
+      setUser(newUser);
+      console.log('[AuthProvider] Direct user state update with:', newUser);
+      
+      // Make sure we update the React state before showing toasts
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       toast({
         title: 'Login successful',
-        description: `Welcome back, ${user.username}!`,
+        description: `Welcome back, ${newUser.username}!`,
       });
+      
+      // Return the user for immediate access in login function
+      return newUser;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to log in';
       setError(message);
@@ -118,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: message,
         variant: 'destructive',
       });
+      throw err; // Re-throw so calling code knows login failed
     } finally {
       setIsLoading(false);
     }
@@ -140,27 +144,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Create a mock user (In a real app, this would be from an API)
-      const user: User = {
+      const newUser: User = {
         id: 1,
         username: data.username,
         email: data.email,
       };
 
-      // Save user to localStorage for persistence
-      localStorage.setItem('mockUser', JSON.stringify(user));
+      // Save user to localStorage for persistence immediately
+      localStorage.setItem('mockUser', JSON.stringify(newUser));
       console.log('[AuthProvider] User saved to localStorage during registration');
       
-      // Use functional update to ensure we're working with the latest state
-      setUser(currentUser => {
-        console.log('[AuthProvider] Updating user state during registration from:', currentUser, 'to:', user);
-        return user;
-      });
-      console.log('[AuthProvider] User state update initiated during registration');
+      // Directly set the user state
+      setUser(newUser);
+      console.log('[AuthProvider] Direct user state update during registration with:', newUser);
+
+      // Make sure we update the React state before showing toasts
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       toast({
         title: 'Registration successful',
-        description: `Welcome, ${user.username}!`,
+        description: `Welcome, ${newUser.username}!`,
       });
+      
+      // Return the user for immediate access in register function
+      return newUser;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to register';
       setError(message);
@@ -169,6 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: message,
         variant: 'destructive',
       });
+      throw err; // Re-throw so calling code knows registration failed
     } finally {
       setIsLoading(false);
     }
