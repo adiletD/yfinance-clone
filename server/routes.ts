@@ -32,6 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userId = (req.user as Express.User).id;
         proxyReq.setHeader('X-User-ID', userId.toString());
       }
+      console.log(`Proxying request to: ${req.url}`);
     },
     onError: (err: Error, req: Request, res: Response) => {
       console.error('Proxy error:', err);
