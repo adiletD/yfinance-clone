@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit2, Save, X, AlertTriangle } from "lucide-react";
 
@@ -30,7 +29,8 @@ interface RevenueEstimatesProps {
 }
 
 export default function RevenueEstimates({ ticker }: RevenueEstimatesProps) {
-  const { user } = useAuth();
+  // Temporarily use a null user until auth is fixed
+  const user = null;
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [customEstimates, setCustomEstimates] = useState<Record<string, string>>({
