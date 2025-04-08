@@ -45,7 +45,7 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
     data: earningsData, 
     isLoading: isLoadingYahooData 
   } = useQuery<YahooFinanceEarningsData>({
-    queryKey: [`/api/earnings/${ticker}`],
+    queryKey: [`/api/stock/${ticker}/earnings`],
   });
   
   // Fetch user's custom estimates if logged in

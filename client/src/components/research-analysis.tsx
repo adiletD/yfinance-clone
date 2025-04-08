@@ -31,7 +31,7 @@ interface ResearchAnalysisProps {
 
 export default function ResearchAnalysis({ ticker }: ResearchAnalysisProps) {
   const { data: analystData, isLoading } = useQuery<ExtendedAnalystData>({
-    queryKey: [`/api/analyst/${ticker}`],
+    queryKey: [`/api/stock/${ticker}/analyst`],
   });
 
   // Rating categories and their colors

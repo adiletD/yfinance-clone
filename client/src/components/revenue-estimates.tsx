@@ -45,7 +45,7 @@ export default function RevenueEstimates({ ticker }: RevenueEstimatesProps) {
     data: revenueData, 
     isLoading: isLoadingYahooData 
   } = useQuery<YahooFinanceRevenueData>({
-    queryKey: [`/api/revenue/${ticker}`],
+    queryKey: [`/api/stock/${ticker}/revenue`],
   });
   
   // Fetch user's custom estimates if logged in

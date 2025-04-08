@@ -47,7 +47,7 @@ export default function GrowthEstimates({ ticker }: GrowthEstimatesProps) {
     data: growthData, 
     isLoading: isLoadingYahooData 
   } = useQuery<YahooFinanceGrowthData>({
-    queryKey: [`/api/growth/${ticker}`],
+    queryKey: [`/api/stock/${ticker}/growth`],
   });
   
   // Fetch user's custom estimates if logged in
