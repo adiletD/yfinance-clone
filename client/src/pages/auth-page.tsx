@@ -94,9 +94,11 @@ export default function AuthPage() {
 
   // Handle login form submission
   const onLoginSubmit = async (data: LoginFormValues) => {
+    console.log("[AuthPage] Login submit:", data);
     setIsPending(true);
     try {
       await login(data);
+      console.log("[AuthPage] Login successful, user state:", { user });
       // The auth hook will handle the toast notification
       navigate("/");
     } catch (error) {

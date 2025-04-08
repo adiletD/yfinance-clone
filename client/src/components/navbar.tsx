@@ -31,6 +31,9 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Debug: Log auth state in navbar
+  console.log("Navbar auth state:", { user, isUser: !!user });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

@@ -48,12 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Debug: Check current user state
+  console.log('[AuthProvider] Current user state:', { user });
+
   // Check if user is already logged in on initial load
   useEffect(() => {
     const storedUser = localStorage.getItem('mockUser');
+    console.log('[AuthProvider] Initializing from localStorage:', { storedUser });
+    
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        console.log('[AuthProvider] Setting user from localStorage:', parsedUser);
+        setUser(parsedUser);
       } catch (err) {
         console.error('Failed to parse stored user data', err);
       }
@@ -63,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Login function
   const login = async (credentials: LoginCredentials) => {
+    console.log('[AuthProvider] Login attempt:', { username: credentials.username });
     setIsLoading(true);
     setError(null);
 
@@ -79,9 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: `${credentials.username}@example.com`,
       };
 
+      console.log('[AuthProvider] User created:', user);
+      
       // Save user to localStorage for persistence
       localStorage.setItem('mockUser', JSON.stringify(user));
+      console.log('[AuthProvider] User saved to localStorage');
+      
       setUser(user);
+      console.log('[AuthProvider] User state updated');
 
       toast({
         title: 'Login successful',

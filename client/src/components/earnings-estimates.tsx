@@ -40,6 +40,9 @@ export default function EarningsEstimates({ ticker }: EarningsEstimatesProps) {
     nextYear: "",
   });
   
+  // Debug: Log auth state
+  console.log("EarningsEstimates auth state:", { user, isUser: !!user });
+  
   // Fetch Yahoo Finance earnings data
   const { 
     data: earningsData, 
